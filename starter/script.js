@@ -71,26 +71,58 @@ const inputClosePin = document.querySelector('.form__input--pin');
 //   ['GBP', 'Pound sterling'],
 // ]);
 
-// const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /////////////////////////////////////////////////
 
 
-const displayMovements = function(movements){
-  containerMovements.innerHTML=''
-  movements.forEach(function(movement, i) {
+const displayMovements = function (movements) {
+  containerMovements.innerHTML = ''
+  movements.forEach(function (movement, i) {
     const transactionType = movement > 0 ? "deposit" : "withdrawal"
-    
+
     const movementHtml = `
     <div class="movements__row">
     <div class="movements__type movements__type--${transactionType}">
-      ${i+1} ${transactionType}
+      ${i + 1} ${transactionType}
     </div>
     <div class="movements__value">${movement}€</div>
   </div>
   `
-  containerMovements.insertAdjacentHTML('afterbegin',movementHtml)
+    containerMovements.insertAdjacentHTML('afterbegin', movementHtml)
 
   })
 }
 displayMovements(account1.movements)
+
+// Balance
+const calcDisplayBalance = (movements) => {
+  const balance = movements.reduce((acc, mov) => acc + mov, 0)
+  labelBalance.textContent = `${balance} EUR`
+}
+calcDisplayBalance(account1.movements)
+
+// summary
+const calcDisplaySummary = (movements)=>{
+  const incomes = movements.filter(mov => mov>0).reduce((acc,mov)=>acc+mov,0)
+  labelSumIn.textContent=`${incomes}€`
+
+  const out = Math.abs(movements.filter(mov => mov<0).reduce((acc,mov)=>acc+mov,0))
+  labelSumOut.textContent=`${out}€`
+
+  const interest= movements
+  .filter(mov => mov>0)
+  .map(deposit=> (deposit * 1.2)/100)
+  .filter((mov)=>mov>1)
+  .reduce((acc,mov)=>acc+mov,0)
+  labelSumInterest.textContent=`${interest}$`
+}
+calcDisplaySummary(account1.movements)
+
+// username generation
+const createUserNames = (accounts) => {
+  accounts.forEach((acc) => {
+    acc.username = acc.owner.toLoweCase().split(' ').map(name => name[0]).join('');
+  })
+}
+createUserNames(accounts)
