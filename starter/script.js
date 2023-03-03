@@ -93,17 +93,17 @@ const displayMovements = function (movements) {
 
   })
 }
-displayMovements(account1.movements)
+
 
 // Balance
 const calcDisplayBalance = (movements) => {
   const balance = movements.reduce((acc, mov) => acc + mov, 0)
   labelBalance.textContent = `${balance} EUR`
 }
-calcDisplayBalance(account1.movements)
+
 
 // summary
-const calcDisplaySummary = (movements)=>{
+const calcDisplaySummary = (movements,interestRate)=>{
   const incomes = movements.filter(mov => mov>0).reduce((acc,mov)=>acc+mov,0)
   labelSumIn.textContent=`${incomes}€`
 
@@ -112,17 +112,51 @@ const calcDisplaySummary = (movements)=>{
 
   const interest= movements
   .filter(mov => mov>0)
-  .map(deposit=> (deposit * 1.2)/100)
+  .map(deposit=> (deposit * interestRate)/100)
   .filter((mov)=>mov>1)
   .reduce((acc,mov)=>acc+mov,0)
   labelSumInterest.textContent=`${interest}$`
 }
-calcDisplaySummary(account1.movements)
+
 
 // username generation
-const createUserNames = (accounts) => {
+(function createUserNames(accounts){
   accounts.forEach((acc) => {
-    acc.username = acc.owner.toLoweCase().split(' ').map(name => name[0]).join('');
+    acc.username = acc.owner.toLowerCase().split(' ').map(name => name[0]).join('');
   })
-}
-createUserNames(accounts)
+})(accounts)
+
+
+//handling login
+let currentAccount
+
+btnLogin.addEventListener("click",(e)=>{
+  e.preventDefault()
+  currentAccount=accounts.find(account => account.username === inputLoginUsername.value)
+  console.log(currentAccount)
+
+  if(currentAccount?.pin === Number(inputLoginPin.value)){
+    console.log("logged in")
+    //empty login inputs
+    inputLoginUsername.value=''
+    inputLoginPin.value=''
+
+    //display welcome message
+    labelWelcome.textContent=`Welcome back, ${currentAccount.owner}`
+    
+    //Display UI
+    containerApp.style.opacity=1;
+
+    //show current user details
+    showUserCreds(currentAccount)
+  }else{
+    containerApp.style.opacity=0;
+    labelWelcome.textContent="Log in to get started"
+  }
+
+  function showUserCreds(currentAccount){
+    displayMovements(currentAccount.movements)
+    calcDisplayBalance(currentAccount.movements)
+    calcDisplaySummary(currentAccount.movements,currentAccount.interestRate)
+  }
+})
