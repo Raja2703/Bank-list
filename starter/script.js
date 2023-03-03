@@ -96,9 +96,9 @@ const displayMovements = function (movements) {
 
 
 // Balance
-const calcDisplayBalance = (movements) => {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0)
-  labelBalance.textContent = `${balance} EUR`
+const calcDisplayBalance = (currentAccount) => {
+  currentAccount.balance = currentAccount.movements.reduce((acc, mov) => acc + mov, 0)
+  labelBalance.textContent = `${currentAccount.balance} EUR`
 }
 
 
@@ -153,10 +153,26 @@ btnLogin.addEventListener("click",(e)=>{
     containerApp.style.opacity=0;
     labelWelcome.textContent="Log in to get started"
   }
+})
 
-  function showUserCreds(currentAccount){
-    displayMovements(currentAccount.movements)
-    calcDisplayBalance(currentAccount.movements)
-    calcDisplaySummary(currentAccount.movements,currentAccount.interestRate)
+function showUserCreds(currentAccount){
+  displayMovements(currentAccount.movements)
+  calcDisplayBalance(currentAccount)
+  calcDisplaySummary(currentAccount.movements,currentAccount.interestRate)
+}
+
+//transfer
+let transferTo
+btnTransfer.addEventListener("click",(e)=>{
+  e.preventDefault();
+  transferTo = accounts.find(account=> account.username === inputTransferTo.value)
+
+  if(transferTo && transferTo.username!==currentAccount.username && Number(inputTransferAmount.value)>0 && currentAccount.balance-Number(inputTransferAmount.value)>=0){
+    currentAccount.movements.push(-Number(inputTransferAmount.value))
+    transferTo.movements.push(Number(inputTransferAmount.value))
+    console.log(transferTo.movements)
+    showUserCreds(currentAccount)
+    inputTransferTo.value=""
+    inputTransferAmount.value=""
   }
 })
